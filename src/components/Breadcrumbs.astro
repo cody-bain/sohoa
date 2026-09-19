@@ -1,0 +1,27 @@
+---
+import { breadcrumbs } from '../lib/nav';
+
+interface Props {
+  currentPath: string;
+}
+
+const trail = breadcrumbs(Astro.props.currentPath);
+---
+
+{
+  trail.length > 1 && (
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+      <ol>
+        {trail.map((item, index) => (
+          <li>
+            {index === trail.length - 1 || !item.href ? (
+              <span aria-current="page">{item.label}</span>
+            ) : (
+              <a href={item.href}>{item.label}</a>
+            )}
+          </li>
+        ))}
+      </ol>
+    </nav>
+  )
+}

@@ -1,0 +1,26 @@
+---
+import { site } from '../data/site';
+---
+
+<header class="site-header">
+  <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="site-nav">
+    <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="currentColor">
+      <rect y="2" width="16" height="2" rx="1"></rect>
+      <rect y="7" width="16" height="2" rx="1"></rect>
+      <rect y="12" width="16" height="2" rx="1"></rect>
+    </svg>
+    <span class="nav-toggle__label">Menu</span>
+  </button>
+
+  <a class="site-header__brand" href="/">
+    <span class="site-header__name">{site.shortName}</span>
+    <span class="site-header__tagline">{site.tagline}</span>
+  </a>
+
+  <span class="site-header__spacer"></span>
+
+  <nav class="site-header__links" aria-label="Site tools">
+    <a href="/keyword-index">Index</a>
+    <a href="/search">Search</a>
+  </nav>
+</header>

@@ -1,0 +1,28 @@
+---
+import { siblings } from '../lib/nav';
+
+interface Props {
+  currentPath: string;
+}
+
+const { previous, next } = siblings(Astro.props.currentPath);
+---
+
+{
+  (previous || next) && (
+    <nav class="page-nav" aria-label="Previous and next page">
+      {previous && (
+        <a class="page-nav__link page-nav__link--previous" href={previous.href} rel="prev">
+          <span class="page-nav__direction">← Previous</span>
+          <span class="page-nav__label">{previous.label}</span>
+        </a>
+      )}
+      {next && (
+        <a class="page-nav__link page-nav__link--next" href={next.href} rel="next">
+          <span class="page-nav__direction">Next →</span>
+          <span class="page-nav__label">{next.label}</span>
+        </a>
+      )}
+    </nav>
+  )
+}

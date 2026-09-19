@@ -1,0 +1,60 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { keywordIndex } from '../data/keyword-index';
+
+/** Group the terms by first letter, keeping the order of the data file. */
+const groups = new Map<string, typeof keywordIndex>();
+let currentLetter = '';
+
+for (const entry of keywordIndex) {
+  if (!entry.sub) currentLetter = entry.term[0].toUpperCase();
+  const letter = currentLetter;
+  if (!groups.has(letter)) groups.set(letter, []);
+  groups.get(letter)!.push(entry);
+}
+
+const letters = [...groups.keys()];
+---
+
+<BaseLayout
+  title="Keyword Index"
+  description="An A-Z index of topics on the Southern Oaks Homeowners Association website."
+  hidePageNav
+>
+  <nav class="keyword-jump" aria-label="Jump to letter">
+    {letters.map((letter) => <a href={`#letter-${letter}`}>{letter}</a>)}
+  </nav>
+
+  {
+    letters.map((letter) => (
+      <section class="keyword-group">
+        <h2 class="keyword-group__letter" id={`letter-${letter}`}>
+          {letter}
+        </h2>
+        <ul class="keyword-list">
+          {groups.get(letter)!.map((entry) => (
+            <li class:list={[entry.sub && 'is-sub']}>
+              {entry.links.length === 0 ? (
+                <span class="keyword-term">{entry.term}</span>
+              ) : entry.links.length === 1 ? (
+                <a href={entry.links[0].href}>{entry.term}</a>
+              ) : (
+                <>
+                  <span class="keyword-term">{entry.term}: </span>
+                  <span class="keyword-links">
+                    {entry.links.map((link, index) => (
+                      <a href={link.href}>
+                        {link.label}
+                        {index < entry.links.length - 1 ? ',' : ''}
+                      </a>
+                    ))}
+                  </span>
+                </>
+              )}
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+</BaseLayout>

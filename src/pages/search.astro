@@ -1,0 +1,112 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Search" description="Search the Southern Oaks Homeowners Association website." hidePageNav>
+  <form class="search-form" role="search" data-search-form>
+    <label class="visually-hidden" for="search-input">Search this site</label>
+    <input
+      class="search-input"
+      id="search-input"
+      type="search"
+      name="q"
+      placeholder="Search for fences, paint, trash…"
+      autocomplete="off"
+      autofocus
+    />
+  </form>
+
+  <p data-search-status aria-live="polite">Loading the search index…</p>
+  <ul class="search-results" data-search-results></ul>
+</BaseLayout>
+
+<script>
+  type Entry = { title: string; href: string; breadcrumb: string; body: string };
+
+  const form = document.querySelector<HTMLFormElement>('[data-search-form]')!;
+  const input = document.querySelector<HTMLInputElement>('#search-input')!;
+  const status = document.querySelector<HTMLParagraphElement>('[data-search-status]')!;
+  const list = document.querySelector<HTMLUListElement>('[data-search-results]')!;
+
+  const escapeHtml = (value: string) =>
+    value.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
+
+  let entries: Entry[] = [];
+
+  /** Rank by where the terms match: title beats breadcrumb beats body. */
+  function score(entry: Entry, terms: string[]) {
+    const title = entry.title.toLowerCase();
+    const breadcrumb = entry.breadcrumb.toLowerCase();
+    const body = entry.body.toLowerCase();
+    let total = 0;
+    for (const term of terms) {
+      if (title.includes(term)) total += 10;
+      else if (breadcrumb.includes(term)) total += 4;
+      else if (body.includes(term)) total += 1;
+      else return 0;
+    }
+    return total;
+  }
+
+  /** A snippet of the body around the first match, with the term highlighted. */
+  function excerpt(entry: Entry, terms: string[]) {
+    const body = entry.body;
+    const at = body.toLowerCase().indexOf(terms[0]);
+    const start = at < 0 ? 0 : Math.max(0, at - 70);
+    const slice = body.slice(start, start + 220).trim();
+    const text = escapeHtml((start > 0 ? '…' : '') + slice + (start + 220 < body.length ? '…' : ''));
+    const pattern = new RegExp(`(${terms.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`, 'gi');
+    return text.replace(pattern, '<mark>$1</mark>');
+  }
+
+  function render(query: string) {
+    const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+    if (!terms.length) {
+      list.innerHTML = '';
+      status.textContent = `Search ${entries.length} pages of the Southern Oaks site.`;
+      return;
+    }
+
+    const matches = entries
+      .map((entry) => ({ entry, rank: score(entry, terms) }))
+      .filter((match) => match.rank > 0)
+      .sort((a, b) => b.rank - a.rank)
+      .slice(0, 30);
+
+    status.textContent = matches.length
+      ? `${matches.length} result${matches.length === 1 ? '' : 's'} for “${query}”.`
+      : `No results for “${query}”.`;
+
+    list.innerHTML = matches
+      .map(
+        ({ entry }) => `
+          <li class="search-result">
+            <a class="search-result__link" href="${entry.href}">${escapeHtml(entry.title)}</a>
+            <div class="search-result__breadcrumb">${escapeHtml(entry.breadcrumb)}</div>
+            <p class="search-result__excerpt">${excerpt(entry, terms)}</p>
+          </li>`
+      )
+      .join('');
+  }
+
+  form.addEventListener('submit', (event) => event.preventDefault());
+  input.addEventListener('input', () => {
+    render(input.value.trim());
+    const url = new URL(window.location.href);
+    if (input.value.trim()) url.searchParams.set('q', input.value.trim());
+    else url.searchParams.delete('q');
+    window.history.replaceState(null, '', url);
+  });
+
+  fetch('/search-index.json')
+    .then((response) => response.json())
+    .then((data: Entry[]) => {
+      entries = data;
+      const initial = new URLSearchParams(window.location.search).get('q') ?? '';
+      input.value = initial;
+      render(initial.trim());
+    })
+    .catch(() => {
+      status.textContent = 'Sorry, the search index could not be loaded.';
+    });
+</script>

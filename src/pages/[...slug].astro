@@ -1,0 +1,30 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionList from '../components/SectionList.astro';
+import { childrenOf, normalize } from '../lib/nav';
+
+export async function getStaticPaths() {
+  const pages = await getCollection('pages');
+  return pages.map((page) => ({
+    // `index` files live at the root of their folder: "guidelines/index" -> "guidelines".
+    params: { slug: page.id.replace(/(^|\/)index$/, '') || undefined },
+    props: { page },
+  }));
+}
+
+const { page } = Astro.props;
+const { Content } = await render(page);
+const children = childrenOf(normalize(Astro.url.pathname));
+---
+
+<BaseLayout
+  title={page.data.title}
+  description={page.data.description}
+  hideTitle={page.data.hideTitle}
+>
+  <div class="prose">
+    <Content />
+  </div>
+  <SectionList items={children} />
+</BaseLayout>

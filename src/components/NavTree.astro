@@ -1,0 +1,74 @@
+---
+import type { NavItem } from '../lib/nav';
+import { isActiveTrail, normalize } from '../lib/nav';
+
+interface Props {
+  items: NavItem[];
+  currentPath: string;
+  /** Nesting depth, used to build stable ids for the disclosure buttons. */
+  depth?: number;
+  /** Set on nested lists so the parent button can reference them. */
+  id?: string;
+}
+
+const { items, currentPath, depth = 0, id } = Astro.props;
+
+/** Anything that is not an internal page opens in a new tab. */
+const leavesSite = (href?: string) => !!href && (!href.startsWith('/') || /\.[a-z0-9]+$/i.test(href));
+---
+
+<ul class="nav-list" id={id}>
+  {
+    items.map((item, index) => {
+      const childId = `nav-${depth}-${index}`;
+      const current = !!item.href && normalize(item.href) === normalize(currentPath);
+      const onTrail = isActiveTrail(item.href, currentPath);
+      const hasChildren = !!item.children?.length;
+      const expanded =
+        hasChildren &&
+        (onTrail || item.children!.some((child) => isActiveTrail(child.href, currentPath)));
+      const external = leavesSite(item.href);
+
+      return (
+        <li class="nav-item">
+          <div class="nav-item__row">
+            {item.href ? (
+              <a
+                class:list={[
+                  'nav-item__link',
+                  onTrail && !current && 'nav-item__link--trail',
+                  external && 'nav-item__link--external',
+                ]}
+                href={item.href}
+                aria-current={current ? 'page' : undefined}
+                {...(external ? { target: '_blank', rel: 'noopener' } : {})}
+              >
+                {item.label}
+              </a>
+            ) : (
+              <span class="nav-item__heading">{item.label}</span>
+            )}
+
+            {hasChildren && (
+              <button
+                class="nav-item__disclosure"
+                type="button"
+                aria-expanded={expanded ? 'true' : 'false'}
+                aria-controls={childId}
+                aria-label={`Toggle ${item.label}`}
+              >
+                <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" fill="currentColor">
+                  <path d="M2 4.5 6 8.5 10 4.5z" />
+                </svg>
+              </button>
+            )}
+          </div>
+
+          {hasChildren && (
+            <Astro.self items={item.children!} currentPath={currentPath} depth={depth + 1} id={childId} />
+          )}
+        </li>
+      );
+    })
+  }
+</ul>

@@ -1,0 +1,19 @@
+---
+import NavTree from './NavTree.astro';
+import { navigation, communityLinks } from '../lib/nav';
+
+interface Props {
+  currentPath: string;
+}
+
+const { currentPath } = Astro.props;
+---
+
+<aside class="sidebar" id="site-nav" aria-label="Site navigation">
+  <NavTree items={navigation} currentPath={currentPath} />
+
+  <div class="nav-section">
+    <h2 class="nav-section__title">Community Links</h2>
+    <NavTree items={communityLinks} currentPath={currentPath} depth={90} />
+  </div>
+</aside>

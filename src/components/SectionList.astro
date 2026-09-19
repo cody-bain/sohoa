@@ -1,0 +1,58 @@
+---
+import type { NavItem } from '../lib/nav';
+
+interface Props {
+  /** Child pages to list, usually from `childrenOf(currentPath)`. */
+  items: NavItem[];
+  /** Heading shown above the list. Omit on nested groups. */
+  heading?: string;
+}
+
+const { items, heading } = Astro.props;
+const leavesSite = (href?: string) => !!href && (!href.startsWith('/') || /\.[a-z0-9]+$/i.test(href));
+
+/**
+ * Keep the sidebar's order: a run of links becomes one list, a heading with
+ * children becomes a nested group, and the two alternate as they appear.
+ */
+type Block = { kind: 'links'; items: NavItem[] } | { kind: 'group'; item: NavItem };
+
+const blocks = items.reduce<Block[]>((acc, item) => {
+  if (item.href) {
+    const last = acc.at(-1);
+    if (last?.kind === 'links') last.items.push(item);
+    else acc.push({ kind: 'links', items: [item] });
+  } else if (item.children?.length) {
+    acc.push({ kind: 'group', item });
+  }
+  return acc;
+}, []);
+---
+
+{
+  blocks.length > 0 && (
+    <nav class="section-list" aria-label={heading ?? 'In this section'}>
+      {heading && <h2 class="section-list__group">{heading}</h2>}
+
+      {blocks.map((block) =>
+        block.kind === 'group' ? (
+          <Astro.self items={block.item.children!} heading={block.item.label} />
+        ) : (
+          <ul class="section-list__items">
+            {block.items.map((item) => (
+              <li>
+                <a
+                  class="section-list__link"
+                  href={item.href}
+                  {...(leavesSite(item.href) ? { target: '_blank', rel: 'noopener' } : {})}
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )
+      )}
+    </nav>
+  )
+}

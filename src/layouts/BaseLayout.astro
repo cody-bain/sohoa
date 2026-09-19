@@ -1,0 +1,90 @@
+---
+import SiteHeader from '../components/SiteHeader.astro';
+import Sidebar from '../components/Sidebar.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import PageNav from '../components/PageNav.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import { normalize } from '../lib/nav';
+import { site } from '../data/site';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  /** Hide the automatic <h1>, for pages whose content supplies its own. */
+  hideTitle?: boolean;
+  /** Hide the previous/next footer links, for pages outside the site map. */
+  hidePageNav?: boolean;
+}
+
+const { title, description, hideTitle = false, hidePageNav = false } = Astro.props;
+const currentPath = normalize(Astro.url.pathname);
+const pageTitle = currentPath === '/' ? site.name : `${title} — ${site.shortName}`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    {description && <meta name="description" content={description} />}
+    <link rel="canonical" href={new URL(currentPath, site.url)} />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={title} />
+    {description && <meta property="og:description" content={description} />}
+    <meta name="theme-color" content="#2c5d88" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <SiteHeader />
+
+    <div class="layout">
+      <Sidebar currentPath={currentPath} />
+
+      <main class="main" id="main">
+        <div class="main__inner">
+          <Breadcrumbs currentPath={currentPath} />
+          {!hideTitle && <h1 class="page-title">{title}</h1>}
+          <slot />
+          {!hidePageNav && <PageNav currentPath={currentPath} />}
+        </div>
+      </main>
+    </div>
+
+    <SiteFooter />
+
+    <script>
+      // Collapse and expand branches of the sidebar.
+      for (const button of document.querySelectorAll<HTMLButtonElement>('.nav-item__disclosure')) {
+        button.addEventListener('click', () => {
+          button.setAttribute('aria-expanded', button.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
+        });
+      }
+
+      // Show and hide the sidebar on narrow screens.
+      const toggle = document.querySelector<HTMLButtonElement>('[data-nav-toggle]');
+      const sidebar = document.getElementById('site-nav');
+      const mobile = window.matchMedia('(max-width: 48rem)');
+
+      function syncSidebar() {
+        if (!sidebar || !toggle) return;
+        const open = toggle.getAttribute('aria-expanded') === 'true';
+        sidebar.hidden = mobile.matches && !open;
+      }
+
+      toggle?.addEventListener('click', () => {
+        toggle.setAttribute('aria-expanded', toggle.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
+        syncSidebar();
+      });
+
+      mobile.addEventListener('change', syncSidebar);
+      syncSidebar();
+
+      // Keep the active sidebar link in view when a page loads deep in the tree.
+      document.querySelector('[aria-current="page"]')?.scrollIntoView({ block: 'center' });
+    </script>
+  </body>
+</html>
