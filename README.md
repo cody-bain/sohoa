@@ -103,9 +103,32 @@ highlights all follow.
 
 ## Publishing
 
-`npm run build` writes the finished site to `dist/`. Upload the contents of
-that folder to the web host, or point a host such as Netlify, Cloudflare Pages
-or GitHub Pages at this repository with:
+The site is hosted on Cloudflare Workers and deploys itself. Push to `main`
+and Cloudflare rebuilds and publishes within a minute or two:
 
-- Build command: `npm run build`
-- Publish directory: `dist`
+```bash
+git add -A
+git commit -m "Update the newsletter link"
+git push
+```
+
+Pushing any other branch gets its own preview URL without touching the live
+site.
+
+- Repository: https://github.com/cody-bain/sohoa
+- Live site: https://sohoa.codybain.com
+- Build command: `npm run build`, deploy command: `npx wrangler deploy`
+- `wrangler.jsonc` tells Cloudflare to serve the built `dist/` folder
+
+### Changing the domain
+
+Three places name the address. When the site moves to its final domain,
+update all three:
+
+1. `site` in `astro.config.mjs` — canonical tags and the sitemap
+2. `Sitemap:` in `public/robots.txt`
+3. The custom domain in the Cloudflare dashboard, under
+   **Workers &amp; Pages → sohoa → Settings → Domains &amp; Routes**
+
+For a one-off build against another address, set `SITE_URL` instead:
+`SITE_URL=https://sohoa.org npm run build`.

@@ -29,7 +29,7 @@ const pageTitle = currentPath === '/' ? site.name : `${title} — ${site.shortNa
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{pageTitle}</title>
     {description && <meta name="description" content={description} />}
-    <link rel="canonical" href={new URL(currentPath, site.url)} />
+    <link rel="canonical" href={new URL(currentPath, Astro.site ?? site.url)} />
     <meta property="og:site_name" content={site.name} />
     <meta property="og:title" content={title} />
     {description && <meta property="og:description" content={description} />}

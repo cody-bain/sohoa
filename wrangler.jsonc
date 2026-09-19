@@ -7,6 +7,10 @@
   // and there is no server-side code, so no "main" entry point is needed.
   "assets": {
     "directory": "./dist",
+    // Serve /contact rather than redirecting it to /contact/. The site's own
+    // links and canonical tags are written without a trailing slash, so this
+    // saves a redirect on every internal click.
+    "html_handling": "drop-trailing-slash",
     // Unknown URLs get the site's own 404 page rather than a bare error.
     "not_found_handling": "404-page"
   }
