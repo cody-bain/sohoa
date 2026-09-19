@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "sohoa",
+  "compatibility_date": "2026-09-19",
+
+  // The site is fully static: Cloudflare serves the built files from `dist`
+  // and there is no server-side code, so no "main" entry point is needed.
+  "assets": {
+    "directory": "./dist",
+    // Unknown URLs get the site's own 404 page rather than a bare error.
+    "not_found_handling": "404-page"
+  }
+}
