@@ -1,0 +1,30 @@
+# Netlify builds and serves the site for sohoa.org.
+#
+# Netlify is used rather than Cloudflare for the live domain because
+# sohoa.org's DNS stays at its current host, and Cloudflare can only serve a
+# root domain when it also runs the domain's DNS. Netlify accepts a plain A
+# record, so the domain's mail records never have to move.
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# The PDFs and images never change once published, so let browsers keep them.
+[[headers]]
+  for = "/media/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+# Astro fingerprints these filenames, so they can be cached indefinitely.
+[[headers]]
+  for = "/_astro/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

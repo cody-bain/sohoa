@@ -103,8 +103,8 @@ highlights all follow.
 
 ## Publishing
 
-The site is hosted on Cloudflare Workers and deploys itself. Push to `main`
-and Cloudflare rebuilds and publishes within a minute or two:
+The site is hosted on Netlify and deploys itself. Push to `main` and Netlify
+rebuilds and publishes within a minute or two:
 
 ```bash
 git add -A
@@ -116,19 +116,31 @@ Pushing any other branch gets its own preview URL without touching the live
 site.
 
 - Repository: https://github.com/cody-bain/sohoa
-- Live site: https://sohoa.codybain.com
-- Build command: `npm run build`, deploy command: `npx wrangler deploy`
-- `wrangler.jsonc` tells Cloudflare to serve the built `dist/` folder
+- Live site: https://sohoa.org
+- Build settings live in `netlify.toml`
+
+A second copy also builds on Cloudflare Workers at
+https://sohoa.codybain.com, configured by `wrangler.jsonc`. It was the
+temporary home before the real domain was ready and can be retired once
+sohoa.org has been live for a while.
+
+### How the domain is wired
+
+sohoa.org's DNS stays with its existing host, because the domain's email
+lives there too and moving nameservers would mean recreating every mail
+record. Only the two website records point at Netlify:
+
+| Record | Value |
+| ------ | ----- |
+| `@` A | Netlify's load balancer address |
+| `www` CNAME | the site's `.netlify.app` address |
+
+Everything else in the zone — `MX`, the SPF `TXT` record, `dkim._domainkey`,
+`webmail`, and the `*` wildcard — is email and hosting infrastructure and
+must be left alone.
 
 ### Changing the domain
 
-Three places name the address. When the site moves to its final domain,
-update all three:
-
-1. `site` in `astro.config.mjs` — canonical tags and the sitemap
-2. `Sitemap:` in `public/robots.txt`
-3. The custom domain in the Cloudflare dashboard, under
-   **Workers &amp; Pages → sohoa → Settings → Domains &amp; Routes**
-
-For a one-off build against another address, set `SITE_URL` instead:
-`SITE_URL=https://sohoa.org npm run build`.
+The address is not hard-coded. Netlify sets `URL` during its builds, and the
+canonical tags, sitemap and `robots.txt` all follow it. To build against a
+different address once: `SITE_URL=https://example.org npm run build`.

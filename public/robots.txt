@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://sohoa.codybain.com/sitemap-index.xml
