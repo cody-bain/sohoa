@@ -23,6 +23,7 @@ echo "# $D via $NS"
 echo
 echo "## mail — these must never change"
 q MX    "$D"
+q MX    "wildcard-probe-zzq7x9.$D"
 q TXT   "$D"
 q A     "mx.$D"
 q CNAME "dkim._domainkey.$D"

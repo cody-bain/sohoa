@@ -50,11 +50,31 @@ for now. Proxying a mail hostname would break mail.
 | A     | `email`           | `66.96.130.233`                                                | DNS only |
 | A     | `ftp`             | `66.96.130.75`                                                 | DNS only |
 | MX    | `@`               | `mx.sohoa.org`, priority `30`                                  | n/a |
+| MX    | `*`               | `mx.sohoa.org`, priority `30`                                  | n/a |
 | TXT   | `@`               | `v=spf1 ip4:66.96.128.0/18 include:websitewelcome.com ?all`    | n/a |
 | CNAME | `dkim._domainkey` | `cur.dkim.v.eigmail.net`                                       | DNS only |
 | CNAME | `_acme-challenge` | `sohoa.org.letsencrypt.vdeck.eigdyn.com`                       | DNS only |
 
-Sixteen records. Delete anything Cloudflare invented that is not on this list.
+Seventeen records. Delete anything Cloudflare invented that is not on this
+list.
+
+The wildcard `MX` is real, even though Newfold's panel does not show it:
+querying `ns1.ipower.com` for the `MX` of any random subdomain returns
+`30 mx.sohoa.org`. Their panel renders the wildcard as an `A` record only,
+so the zone has behaviour the panel does not display. Verify by observation,
+not by the panel.
+
+Cloudflare's own scan finds ten of the seventeen and proxies most of them.
+Both problems have to be fixed by hand:
+
+- **Proxying must be off** on every record. Cloudflare's proxy answers with
+  its own addresses and forwards only HTTP, so a proxied `mx` sends inbound
+  mail to servers that do not speak SMTP, and a proxied `dkim._domainkey`
+  hides the signing key.
+- **Seven records are missing** — `mail`, `smtp`, `imap`, `pop`, `webmail`,
+  `email` and `ftp`. The wildcard happens to cover five of them, but
+  `webmail` and `email` point at `66.96.130.233`, which the wildcard would
+  not serve.
 
 The website records keep pointing at the old host on purpose. Phase 1 is a
 copy, not a change — that way, if anything goes wrong in phase 3, the only
