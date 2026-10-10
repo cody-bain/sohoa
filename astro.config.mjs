@@ -5,9 +5,9 @@ import { rehypeTableScroll } from './src/plugins/rehype-table-scroll.mjs';
 
 export default defineConfig({
   // The address the site is served from, used for canonical tags and the
-  // sitemap. Netlify sets URL to the live domain during its builds; SITE_URL
-  // overrides both for a one-off build against some other address.
-  site: process.env.SITE_URL ?? process.env.URL ?? 'https://sohoa.codybain.com',
+  // sitemap. SITE_URL overrides it for a one-off build against another
+  // address.
+  site: process.env.SITE_URL ?? 'https://sohoa.org',
   trailingSlash: 'ignore',
   build: { format: 'directory' },
   integrations: [sitemap()],

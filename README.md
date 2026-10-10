@@ -103,8 +103,8 @@ highlights all follow.
 
 ## Publishing
 
-The site is hosted on Netlify and deploys itself. Push to `main` and Netlify
-rebuilds and publishes within a minute or two:
+The site is hosted on Cloudflare Workers and deploys itself. Push to `main`
+and Cloudflare rebuilds and publishes within a minute or two:
 
 ```bash
 git add -A
@@ -116,31 +116,29 @@ Pushing any other branch gets its own preview URL without touching the live
 site.
 
 - Repository: https://github.com/cody-bain/sohoa
-- Live site: https://sohoa.org
-- Build settings live in `netlify.toml`
+- Live site: https://sohoa.org (and https://www.sohoa.org)
+- Build command `npm run build`, deploy command `npx wrangler deploy`
+- `wrangler.jsonc` tells Cloudflare to serve the built `dist/` folder
 
-A second copy also builds on Cloudflare Workers at
-https://sohoa.codybain.com, configured by `wrangler.jsonc`. It was the
-temporary home before the real domain was ready and can be retired once
-sohoa.org has been live for a while.
+https://sohoa.codybain.com serves the same build. It was the temporary home
+before the real domain was ready and can be removed from the Worker's
+custom domains whenever you like.
 
 ### How the domain is wired
 
-sohoa.org's DNS stays with its existing host, because the domain's email
-lives there too and moving nameservers would mean recreating every mail
-record. Only the two website records point at Netlify:
+Cloudflare runs sohoa.org's DNS, but the domain's **email still lives at
+Newfold** (Network Solutions / iPower) and its records were copied across
+untouched. See `docs/dns.md` for the full zone and `docs/dns-migration.md`
+for how the move was done and what must never be proxied.
 
-| Record | Value |
-| ------ | ----- |
-| `@` A | Netlify's load balancer address |
-| `www` CNAME | the site's `.netlify.app` address |
-
-Everything else in the zone — `MX`, the SPF `TXT` record, `dkim._domainkey`,
-`webmail`, and the `*` wildcard — is email and hosting infrastructure and
-must be left alone.
+Only `@` and `www` point at this site. Everything else in the zone — `MX`,
+the SPF `TXT` record, `dkim._domainkey`, `webmail`, `mail`, `smtp`, `imap`,
+`pop`, `ftp` and the `*` wildcard — is email infrastructure and must be left
+alone.
 
 ### Changing the domain
 
-The address is not hard-coded. Netlify sets `URL` during its builds, and the
-canonical tags, sitemap and `robots.txt` all follow it. To build against a
-different address once: `SITE_URL=https://example.org npm run build`.
+The address is not hard-coded in the pages. Update `site` in
+`astro.config.mjs` and the canonical tags, sitemap and `robots.txt` all
+follow. For a one-off build against another address:
+`SITE_URL=https://example.org npm run build`.
