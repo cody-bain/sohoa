@@ -55,8 +55,9 @@ Current mail infrastructure, all Newfold:
 These come from the Newfold control panel, not from DNS, and they decide
 which provider makes sense:
 
-1. **Does `residents@` send to all homeowners?** The deciding question —
-   see sending limits below.
+1. ~~Does `residents@` send to all homeowners?~~ **Answered: yes.** It is a
+   distribution list of **81 external addresses**, confirmed from the
+   Newfold panel on 2026-10-10. See "The residents list" below.
 2. **How far back does the mail go?** The sizes are known; the age of the
    archive decides how much of it is an association record worth keeping.
 3. **Are there forwarders or aliases?** An address that merely forwards to
@@ -67,6 +68,47 @@ which provider makes sense:
 5. **Who holds the passwords?** Mailbox migration needs the current
    credentials, and on an HOA board that knowledge tends to leave with the
    last treasurer.
+
+## The residents list
+
+`residents@sohoa.org` forwards to 81 personal addresses. The mix matters,
+because it decides how the mail has to be sent:
+
+| Recipient domain | Count |
+| ---------------- | ----- |
+| gmail.com | 41 |
+| yahoo.com | 10 |
+| hotmail.com | 7 |
+| verizon.net | 6 |
+| aol.com | 6 |
+| other | 11 |
+
+This rules out handling it as a mail forward, for three separate reasons:
+
+1. **A Migadu mailbox forwards to at most 25 destinations.** 81 does not
+   fit, on any plan.
+2. **One send is 81 outgoing messages.** Micro allows 20 a day; even Mini's
+   100 would permit a single send with nothing to spare.
+3. **Deliverability.** Thirty-two of the recipients are on Yahoo, AOL,
+   Verizon, Hotmail, MSN and Cox, whose filters treat a sudden identical
+   mailing from a small domain with suspicion — and sohoa.org publishes no
+   DMARC record. Mail that gets flagged damages the domain's reputation for
+   everything else, so ARB approvals and billing notices start landing in
+   spam too.
+
+So `residents@` moves to a mailing service rather than a mailbox. It sends
+as `residents@sohoa.org`, replies return to a Migadu mailbox of the same
+name, and residents see no difference. EmailOctopus's free tier covers 2,500
+subscribers, so the cost stays at zero.
+
+Two things for the board rather than for whoever does the migration:
+
+- **Seven of the 81 do not look like residents** — a property-management
+  admin, a realtor address, and several business domains. They may be
+  managers acting for rental units, or they may be stale. Worth a review.
+- **Mailing services require an unsubscribe link**, which lets an owner opt
+  out of notices the association may be obliged to deliver. Confirm which
+  communications are sent electronically and which go by post.
 
 ## Options
 
@@ -88,7 +130,8 @@ does not qualify.
 
 ## Recommendation
 
-**Migadu Micro, $19/year**, unless `residents@` sends to every homeowner.
+**Migadu Micro at $19/year for the four role mailboxes, plus a free mailing
+service for `residents@`.**
 
 Pricing is per account rather than per mailbox, so all five cost the same as
 one, and new role addresses are free — which suits a body whose membership
@@ -96,10 +139,13 @@ changes every year. The 924 MB of existing mail sits comfortably inside the
 5 GB pool, and pooled storage removes the 512 MB per-mailbox cap that
 `info@` is already pressing against.
 
-If the association does email all homeowners at once, 20 outgoing messages a
-day will fail on the first newsletter. Use Migadu Mini at $90/year, or
-Google Workspace, or keep a cheap mailbox provider and send bulk mail
-through a service built for it.
+`info@`, `ARB@` and `treasurer@` each forward to a handful of board members,
+well inside the 25-destination limit. `residents@` does not fit that model
+at all and goes to a mailing service instead, for the reasons above.
+
+SPF, DKIM and a DMARC record for the mailing service have to be added to
+Cloudflare DNS. DMARC does not exist for the domain today and is worth
+adding regardless.
 
 ### Why not iCloud+
 
