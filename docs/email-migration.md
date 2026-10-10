@@ -6,9 +6,26 @@ mailboxes are what is still being paid for.
 Prices below were checked in October 2026 and change often — confirm on each
 provider's own pricing page before committing.
 
-## What is known
+## The mailboxes
 
-Only two addresses appear anywhere on the website:
+Five, read from the Newfold panel on 2026-10-10:
+
+| Mailbox | Used | Quota |
+| ------- | ---- | ----- |
+| `info@sohoa.org` | 415.4 MB | 512 MB — **81% full** |
+| `treasurer@sohoa.org` | 204.0 MB | 512 MB |
+| `arb@sohoa.org` | 179.0 MB | 512 MB |
+| `billing@sohoa.org` | 98.7 MB | 512 MB |
+| `residents@sohoa.org` | 26.9 MB | 512 MB |
+| **Total** | **924 MB** | |
+
+Small enough that an IMAP transfer runs in well under an hour.
+
+`info@` being at 81% of its quota is a problem today, independent of any
+migration. Newfold caps each mailbox at 512 MB; pooled-storage providers do
+not.
+
+Only two of the five appear anywhere on the website:
 
 | Address | Used for |
 | ------- | -------- |
@@ -38,33 +55,32 @@ Current mail infrastructure, all Newfold:
 These come from the Newfold control panel, not from DNS, and they decide
 which provider makes sense:
 
-1. **How many mailboxes actually exist?** The site only references two, but
-   the account may hold more that were never published.
-2. **How much mail is stored, and how far back?** This sets how long the
-   transfer takes and whether history is worth moving.
+1. **Does `residents@` send to all homeowners?** The deciding question —
+   see sending limits below.
+2. **How far back does the mail go?** The sizes are known; the age of the
+   archive decides how much of it is an association record worth keeping.
 3. **Are there forwarders or aliases?** An address that merely forwards to
    someone's personal account is not a mailbox and migrates differently.
 4. **Does anyone collect mail over POP?** POP clients often delete messages
    from the server after download, meaning the only copy of years of
    association correspondence may be on one person's laptop.
-5. **Does the association send bulk email to residents?** This is the single
-   biggest factor in choosing a provider — see the sending limits below.
-6. **Who holds the passwords?** Mailbox migration needs the current
+5. **Who holds the passwords?** Mailbox migration needs the current
    credentials, and on an HOA board that knowledge tends to leave with the
    last treasurer.
 
 ## Options
 
-Costs are for two mailboxes per year.
+Costs are for five mailboxes per year.
 
-| Provider | Cost / year | Sending limit | Notes |
-| -------- | ----------- | ------------- | ----- |
-| **Migadu** Micro | ~$19 | ~20 messages/day | Priced per account, not per mailbox, so unlimited aliases. The daily cap rules out resident-wide email. |
-| **Zoho Mail** free | $0 | modest | Up to five users on one domain, but no IMAP, so no Apple Mail or Outlook — webmail only. |
-| **Zoho Mail** Lite | ~$24 | modest | Adds IMAP and real support. |
-| **Fastmail** | ~$120 | generous | Simple and well supported. Confirm that a custom domain is included at the tier quoted. |
-| **Google Workspace** Starter | ~$168 | ~2,000 recipients/day | Familiar to everyone, includes Drive and Meet, easiest handover between board members. |
-| **Microsoft 365** Business Basic | ~$144 | generous | Comparable to Google; choose on which suite the board already knows. |
+| Provider | Cost / year | Storage | Outgoing limit | Notes |
+| -------- | ----------- | ------- | -------------- | ----- |
+| **Migadu** Micro | $19 | 5 GB pooled | 20/day | Priced per account, so five mailboxes cost the same as one. Soft limits; mail never bounces for full storage. |
+| **Migadu** Mini | $90 | 30 GB pooled | 100/day | Same, with room for resident-wide email. |
+| **Zoho Mail** free | $0 | 5 GB/user | modest | Exactly five users allowed, so no headroom. No IMAP — webmail only. |
+| **Zoho Mail** Lite | ~$60 | 5 GB/user | modest | Adds IMAP. |
+| **Fastmail** | ~$300 | varies | generous | Confirm a custom domain is included at the tier quoted. |
+| **Google Workspace** Starter | ~$420 | 30 GB/user | ~2,000/day | Familiar, includes Drive and Meet. |
+| **Microsoft 365** Business Basic | ~$360 | 50 GB/user | generous | Comparable to Google. |
 
 **Do not count on a nonprofit discount.** Google for Nonprofits requires
 501(c)(3) status, and homeowners associations are normally 501(c)(4), which
@@ -72,20 +88,30 @@ does not qualify.
 
 ## Recommendation
 
-It depends entirely on question 5 above.
+**Migadu Micro, $19/year**, unless `residents@` sends to every homeowner.
 
-- **If the association does not email all residents at once**, Migadu Micro
-  at roughly $19/year is the best fit. Pricing per account rather than per
-  mailbox means `info@`, `ARB@`, and a separate address per board role can
-  all exist at no extra cost, which suits a body whose membership changes
-  every year.
-- **If the association does send newsletters or notices to every
-  homeowner**, Migadu's ~20 messages per day will fail. Use Google Workspace
-  Starter, or keep a cheap mailbox provider and send bulk mail through a
-  service built for it.
+Pricing is per account rather than per mailbox, so all five cost the same as
+one, and new role addresses are free — which suits a body whose membership
+changes every year. The 924 MB of existing mail sits comfortably inside the
+5 GB pool, and pooled storage removes the 512 MB per-mailbox cap that
+`info@` is already pressing against.
 
-Either way the bill should drop well below what the Newfold plan costs,
-since that plan was mostly paying for web hosting that is no longer used.
+If the association does email all homeowners at once, 20 outgoing messages a
+day will fail on the first newsletter. Use Migadu Mini at $90/year, or
+Google Workspace, or keep a cheap mailbox provider and send bulk mail
+through a service built for it.
+
+### Why not iCloud+
+
+It is the cheapest option on paper and the wrong shape for an association.
+All the addresses on a domain deliver into the single mailbox of the Apple
+Account that owns them, so the five role mailboxes would collapse into one.
+Separate mailboxes require sharing the domain with up to five other people,
+each using their own Apple Account — which puts association mail inside
+board members' personal inboxes, where it leaves with them. Apple also
+states that Custom Email Domain does not support managed accounts, so there
+is no admin, no delegation and no reassigning a mailbox when an officer
+steps down.
 
 ## How the migration would go
 
